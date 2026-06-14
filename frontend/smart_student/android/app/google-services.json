@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "780168377071",
+    "project_id": "smart-student-b52ff",
+    "storage_bucket": "smart-student-b52ff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780168377071:android:687bfbec8932897f8c211a",
+        "android_client_info": {
+          "package_name": "com.example.smart_student"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "780168377071-arj9mjedi6cvue625e13aa074amga9q7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3iq7_XsWxKxck15LettMAWed3EuuUBdc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "780168377071-arj9mjedi6cvue625e13aa074amga9q7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "780168377071-3fm1e9oq8n8is0p6gcm3f5vbopf8bkaq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.smartStudent"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780168377071:android:8b1fd16aee7b4efc8c211a",
+        "android_client_info": {
+          "package_name": "com.smartstudent.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "780168377071-bv9uiqj8bl9d4estujc26c16saskelna.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smartstudent.app",
+            "certificate_hash": "fb878daa65e0f1463eeb139872c1d61be2a8219e"
+          }
+        },
+        {
+          "client_id": "780168377071-arj9mjedi6cvue625e13aa074amga9q7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3iq7_XsWxKxck15LettMAWed3EuuUBdc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "780168377071-arj9mjedi6cvue625e13aa074amga9q7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "780168377071-3fm1e9oq8n8is0p6gcm3f5vbopf8bkaq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.smartStudent"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

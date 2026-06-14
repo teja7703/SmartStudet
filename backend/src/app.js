@@ -13,6 +13,32 @@ app.use(express.json());
 
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
+
+const storyRoutes = require('./routes/storyRoutes');
+app.use('/api/stories', storyRoutes);
+
+const careerRoutes = require('./routes/careerRoutes');
+app.use('/api/careers', careerRoutes);
+
+const quizRoutes = require('./routes/quizRoutes');
+app.use('/api/quizzes', quizRoutes);
+
+const studyMaterialRoutes =
+  require('./routes/studyMaterialRoutes');
+
+app.use(
+  '/api/study-materials',
+  studyMaterialRoutes
+);
+
+const previousPaperRoutes =
+  require('./routes/previousPaperRoutes');
+
+app.use(
+  '/api/previous-papers',
+  previousPaperRoutes
+);
+
 app.get('/', (req, res) => {
   res.json({
     success: true,

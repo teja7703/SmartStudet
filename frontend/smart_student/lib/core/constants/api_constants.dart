@@ -5,9 +5,9 @@ class ApiConstants {
 
   static String get baseUrl {
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3000';
+      return 'https://smartstudent-api.onrender.com';
     }
-    return 'http://localhost:3000';
+    return 'https://smartstudent-api.onrender.com';
   }
 
   static String get authLogin => '$baseUrl/api/auth/login';

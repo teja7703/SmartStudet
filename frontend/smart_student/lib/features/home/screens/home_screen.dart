@@ -75,8 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 slivers: [
                   SliverToBoxAdapter(child: _Header(user: user, greeting: _greeting())),
                   if (state is DashboardLoading)
-                    const SliverFillRemaining(
-                      hasScrollBody: false,
+                    const SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.all(16),
                         child: ShimmerGridLoading(itemCount: 6),

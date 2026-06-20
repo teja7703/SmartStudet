@@ -5,7 +5,7 @@ import '../models/study_material_model.dart';
 class StudyMaterialService {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'http://10.0.2.2:3000/api',
+      baseUrl: 'https://smartstudent-api.onrender.com',
     ),
   );
 

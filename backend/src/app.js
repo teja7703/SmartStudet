@@ -47,6 +47,9 @@ const dashboardRoutes =
 
 app.use('/api/dashboard', dashboardRoutes);
 
+const aiRoutes = require('./routes/aiRoutes');
+app.use('/api/ai', aiRoutes);
+
 app.get('/', (req, res) => {
   res.json({
     success: true,

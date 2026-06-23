@@ -118,4 +118,44 @@ class StorageService {
     final p = await prefs;
     await p.remove(AppConstants.activityKey);
   }
+
+  // ---- SmartGPT chat history --------------------------------------------
+
+  Future<List<Map<String, dynamic>>> getSmartGptConversations() async {
+    final p = await prefs;
+    final raw = p.getStringList(AppConstants.smartGptHistoryKey) ?? [];
+    return raw.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
+  }
+
+  /// Inserts or updates a conversation (matched by id), keeping the newest
+  /// first and capping the history at 50 conversations.
+  Future<void> saveSmartGptConversation(
+    Map<String, dynamic> conversation,
+  ) async {
+    final p = await prefs;
+    final raw = p.getStringList(AppConstants.smartGptHistoryKey) ?? [];
+    final list = raw
+        .map((e) => jsonDecode(e) as Map<String, dynamic>)
+        .where((e) => e['id'] != conversation['id'])
+        .toList();
+    list.insert(0, conversation);
+    final trimmed = list.take(50).map(jsonEncode).toList();
+    await p.setStringList(AppConstants.smartGptHistoryKey, trimmed);
+  }
+
+  Future<void> deleteSmartGptConversation(String id) async {
+    final p = await prefs;
+    final raw = p.getStringList(AppConstants.smartGptHistoryKey) ?? [];
+    final list = raw
+        .map((e) => jsonDecode(e) as Map<String, dynamic>)
+        .where((e) => e['id'] != id)
+        .map(jsonEncode)
+        .toList();
+    await p.setStringList(AppConstants.smartGptHistoryKey, list);
+  }
+
+  Future<void> clearSmartGptHistory() async {
+    final p = await prefs;
+    await p.remove(AppConstants.smartGptHistoryKey);
+  }
 }

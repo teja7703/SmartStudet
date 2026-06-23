@@ -23,6 +23,7 @@ import 'features/previous_papers/screens/previous_paper_subjects_screen.dart';
 import 'features/profile/screens/edit_profile_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/search/screens/search_screen.dart';
+import 'features/smart_gpt/screens/smart_gpt_screen.dart';
 import 'features/spoken_english/screens/spoken_english_screen.dart';
 import 'features/quizzes/models/quiz_model.dart';
 import 'features/quizzes/models/quiz_result_model.dart';
@@ -287,6 +288,13 @@ GoRouter createRouter(AuthCubit authCubit) {
       GoRoute(
         path: '/spoken-english',
         builder: (context, state) => const SpokenEnglishScreen(),
+      ),
+      GoRoute(
+        path: '/smart-gpt',
+        builder: (context, state) => BlocProvider(
+          create: (_) => createSmartGptCubit(),
+          child: const SmartGPTScreen(),
+        ),
       ),
       GoRoute(
         path: '/coming-soon/:feature',

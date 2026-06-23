@@ -7,6 +7,7 @@ class AppConstants {
   static const String readProgressKey = 'story_read_progress';
   static const String quizHistoryKey = 'quiz_history';
   static const String activityKey = 'recent_activity';
+  static const String smartGptHistoryKey = 'smart_gpt_history';
 
   static const List<String> motivationalQuotes = [
     'Education is the passport to the future.',

@@ -15,6 +15,8 @@ import '../../auth/cubit/auth_state.dart';
 import '../../auth/models/user_model.dart';
 import '../../progress/cubit/progress_cubit.dart';
 import '../../progress/models/progress_stats.dart';
+import '../../smart_gpt/widgets/smart_gpt_fab.dart';
+import '../../smart_gpt/widgets/smart_gpt_promo_card.dart';
 import '../cubit/dashboard_cubit.dart';
 import '../cubit/dashboard_state.dart';
 
@@ -68,15 +70,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
         return BlocBuilder<DashboardCubit, DashboardState>(
           builder: (context, state) {
-            return RefreshIndicator(
-              onRefresh: _refresh,
-              color: AppColors.primaryBlue,
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: _Header(user: user, greeting: _greeting()),
-                  ),
-                  if (state is DashboardLoading)
+            return Scaffold(
+              backgroundColor: Colors.transparent,
+              floatingActionButton: SmartGptFab(
+                onPressed: () => context.push('/smart-gpt'),
+              ),
+              body: RefreshIndicator(
+                onRefresh: _refresh,
+                color: AppColors.primaryBlue,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _Header(user: user, greeting: _greeting()),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: SmartGptPromoCard(
+                          onTap: () => context.push('/smart-gpt'),
+                        ),
+                      ),
+                    ),
+                    if (state is DashboardLoading)
                     const SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.all(16),
@@ -145,9 +160,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SliverToBoxAdapter(child: _ProgressSection()),
-                    const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                    const SliverToBoxAdapter(child: SizedBox(height: 88)),
                   ],
                 ],
+                ),
               ),
             );
           },

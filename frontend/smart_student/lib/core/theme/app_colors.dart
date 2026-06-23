@@ -72,6 +72,14 @@ class AppColors {
     colors: [Color(0xFF6C5CE7), Color(0xFF2E6FD6)],
   );
 
+  /// Blue -> Purple gradient used by the SmartGPT AI Tutor surfaces
+  /// (home promo card, floating action button, chat accents).
+  static const LinearGradient smartGptGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF2E6FD6), Color(0xFF8B5CF6)],
+  );
+
   /// Returns a 2-stop gradient derived from a single brand [color].
   static LinearGradient gradientFor(Color color) {
     return LinearGradient(

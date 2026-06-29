@@ -197,9 +197,8 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => context.go(
-                  '/quizzes/${result.language}/${result.classLevel}/subjects',
-                ),
+                onPressed: () =>
+                    context.go('/quizzes/${result.classLevel}/subjects'),
                 icon: const Icon(Icons.arrow_forward_rounded),
                 label: const Text('Next Quiz'),
               ),

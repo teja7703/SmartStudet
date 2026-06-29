@@ -7,6 +7,11 @@ class AnswerRecord {
   final String? selectedAnswer;
   final String explanation;
 
+  // Telugu translations (optional). `optionsTe` is parallel to `options`.
+  final String questionTe;
+  final List<String> optionsTe;
+  final String explanationTe;
+
   const AnswerRecord({
     this.questionId = '',
     required this.question,
@@ -14,11 +19,21 @@ class AnswerRecord {
     required this.correctAnswer,
     required this.selectedAnswer,
     required this.explanation,
+    this.questionTe = '',
+    this.optionsTe = const [],
+    this.explanationTe = '',
   });
 
   bool get isAnswered => selectedAnswer != null && selectedAnswer!.isNotEmpty;
 
   bool get isCorrect => isAnswered && selectedAnswer == correctAnswer;
+
+  /// Telugu translation for a given English [option], matched by position.
+  String teForOption(String option) {
+    final i = options.indexOf(option);
+    if (i < 0 || i >= optionsTe.length) return '';
+    return optionsTe[i];
+  }
 
   Map<String, dynamic> toJson() => {
         'questionId': questionId,
@@ -27,6 +42,9 @@ class AnswerRecord {
         'correctAnswer': correctAnswer,
         'selectedAnswer': selectedAnswer,
         'explanation': explanation,
+        'questionTe': questionTe,
+        'optionsTe': optionsTe,
+        'explanationTe': explanationTe,
       };
 
   factory AnswerRecord.fromJson(Map<String, dynamic> json) {
@@ -37,6 +55,9 @@ class AnswerRecord {
       correctAnswer: json['correctAnswer']?.toString() ?? '',
       selectedAnswer: json['selectedAnswer']?.toString(),
       explanation: json['explanation']?.toString() ?? '',
+      questionTe: json['questionTe']?.toString() ?? '',
+      optionsTe: List<String>.from(json['optionsTe'] ?? const []),
+      explanationTe: json['explanationTe']?.toString() ?? '',
     );
   }
 }

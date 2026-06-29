@@ -28,7 +28,6 @@ import 'features/spoken_english/screens/spoken_english_screen.dart';
 import 'features/quizzes/models/quiz_model.dart';
 import 'features/quizzes/models/quiz_result_model.dart';
 import 'features/quizzes/screens/quiz_history_screen.dart';
-import 'features/quizzes/screens/quiz_language_screen.dart';
 import 'features/quizzes/screens/quiz_play_screen.dart';
 import 'features/quizzes/screens/quiz_result_screen.dart';
 import 'features/quizzes/screens/quiz_review_screen.dart';
@@ -252,23 +251,12 @@ GoRouter createRouter(AuthCubit authCubit) {
         builder: (context, state) => const QuizHistoryScreen(),
       ),
       GoRoute(
-        path: '/quizzes/:level/language',
+        path: '/quizzes/:level/subjects',
         builder: (context, state) {
-          final level = state.pathParameters['level']!;
-          return QuizLanguageScreen(classLevel: level);
-        },
-      ),
-      GoRoute(
-        path: '/quizzes/:lang/:level/subjects',
-        builder: (context, state) {
-          final lang = state.pathParameters['lang']!;
           final level = state.pathParameters['level']!;
           return BlocProvider(
-            create: (_) => createQuizSubjectsCubit(
-              classLevel: level,
-              language: lang,
-            )..load(),
-            child: QuizSubjectsScreen(classLevel: level, language: lang),
+            create: (_) => createQuizSubjectsCubit(classLevel: level)..load(),
+            child: QuizSubjectsScreen(classLevel: level),
           );
         },
       ),

@@ -71,6 +71,9 @@ class QuizPlayCubit extends Cubit<QuizPlayState> {
         correctAnswer: q.correctAnswer,
         selectedAnswer: selected,
         explanation: q.explanation,
+        questionTe: q.questionTe,
+        optionsTe: q.optionsTe,
+        explanationTe: q.explanationTe,
       );
       if (record.isCorrect) {
         correct += 1;

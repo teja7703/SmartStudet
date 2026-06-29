@@ -10,6 +10,10 @@ const answerSchema = new mongoose.Schema(
     correctAnswer: String,
     selectedAnswer: String,
     explanation: String,
+    // Telugu translations (parallel to options) for bilingual review.
+    questionTe: String,
+    optionsTe: [String],
+    explanationTe: String,
   },
   { _id: false }
 );

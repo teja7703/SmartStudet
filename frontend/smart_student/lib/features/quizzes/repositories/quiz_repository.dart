@@ -47,17 +47,13 @@ class QuizRepository {
     return data.map((e) => QuestionModel.fromJson(e)).toList();
   }
 
-  /// Builds the subject list (each a full question pool) for one class and the
-  /// chosen [language].
+  /// Builds the subject list (each a full question pool) for one class.
   ///
-  /// English-subject rule: the "English" subject is always returned in English
-  /// regardless of [language]. For every other subject the chosen language is
-  /// used, falling back to English questions when none exist in that language
-  /// (so the screen is never empty when only English content has been seeded).
-  Future<List<QuizModel>> getSubjects({
-    required String classLevel,
-    required String language,
-  }) async {
+  /// Quizzes are bilingual: every question carries its Telugu translation, so
+  /// there is no language filtering here — all questions for the subject are
+  /// included and the UI shows English with Telugu below (except the English
+  /// subject, which is shown in English only).
+  Future<List<QuizModel>> getSubjects({required String classLevel}) async {
     final questions = await getQuestions(classLevel: classLevel, limit: 1000);
 
     final bySubject = <String, List<QuestionModel>>{};
@@ -68,22 +64,12 @@ class QuizRepository {
 
     final quizzes = <QuizModel>[];
     bySubject.forEach((subject, pool) {
-      final effectiveLang = _effectiveLanguage(subject, language);
-
-      var selected =
-          pool.where((q) => q.language == effectiveLang).toList();
-      if (selected.isEmpty) {
-        selected = pool.where((q) => q.language == 'English').toList();
-      }
-      if (selected.isEmpty) selected = pool;
-
       quizzes.add(QuizModel(
         id: '$classLevel-$subject',
         title: '$subject Quiz',
         subject: subject,
         classLevel: classLevel,
-        language: effectiveLang,
-        questions: selected,
+        questions: pool,
       ));
     });
 
@@ -95,12 +81,11 @@ class QuizRepository {
   /// best/avg score, last attempt). Empty map when offline.
   Future<Map<String, SubjectQuizStats>> getQuizStats({
     required String classLevel,
-    required String language,
   }) async {
     try {
       final response = await _apiClient.get(
         '/api/progress/quiz-stats',
-        queryParameters: {'classLevel': classLevel, 'language': language},
+        queryParameters: {'classLevel': classLevel},
       );
       final data =
           (response.data['data'] as Map?)?.cast<String, dynamic>() ?? {};
@@ -117,7 +102,7 @@ class QuizRepository {
 
   /// Composes a fresh quiz attempt from a subject [pool]: excludes questions the
   /// user already completed (unless [practiceAgain]), shuffles question order
-  /// and the options of each question.
+  /// and the options of each question (keeping Telugu options aligned).
   QuizModel buildAttempt(
     QuizModel pool, {
     Set<String> completedIds = const {},
@@ -138,10 +123,7 @@ class QuizRepository {
     }
 
     available.shuffle(rng);
-    final picked = available.take(size).map((q) {
-      final options = [...q.options]..shuffle(rng);
-      return q.copyWith(options: options);
-    }).toList();
+    final picked = available.take(size).map(_shuffleOptions).toList();
 
     return pool.copyWith(
       id: '${pool.id}-${DateTime.now().millisecondsSinceEpoch}',
@@ -149,9 +131,14 @@ class QuizRepository {
     );
   }
 
-  String _effectiveLanguage(String subject, String chosen) {
-    if (subject.toLowerCase() == 'english') return 'English';
-    return chosen;
+  /// Shuffles a question's options, keeping the parallel Telugu options aligned.
+  QuestionModel _shuffleOptions(QuestionModel q) {
+    final indices = List<int>.generate(q.options.length, (i) => i)..shuffle();
+    final options = [for (final i in indices) q.options[i]];
+    final hasTe = q.optionsTe.length == q.options.length;
+    final optionsTe =
+        hasTe ? [for (final i in indices) q.optionsTe[i]] : q.optionsTe;
+    return q.copyWith(options: options, optionsTe: optionsTe);
   }
 
   /// Builds the full quiz catalog dynamically: a list of quizzes per class

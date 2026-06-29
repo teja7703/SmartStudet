@@ -25,6 +25,9 @@ class QuizPlayScreen extends StatelessWidget {
         final question = quiz.questions[state.currentIndex];
         final color = QuizUi.subjectColor(quiz.subject);
         final lowTime = state.secondsRemaining <= 10;
+        // English subject practices English only; every other subject shows the
+        // Telugu translation directly below the English text.
+        final bilingual = quiz.subject.toLowerCase() != 'english';
 
         return PopScope(
           canPop: false,
@@ -86,9 +89,24 @@ class QuizPlayScreen extends StatelessWidget {
                       children: [
                         AppCard(
                           color: color.withValues(alpha: 0.08),
-                          child: Text(
-                            question.question,
-                            style: AppTextStyles.headlineMedium,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                question.question,
+                                style: AppTextStyles.headlineMedium,
+                              ),
+                              if (bilingual &&
+                                  question.questionTe.isNotEmpty) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  question.questionTe,
+                                  style: AppTextStyles.titleMedium.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -127,9 +145,28 @@ class QuizPlayScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: Text(
-                                      option,
-                                      style: AppTextStyles.bodyLarge,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          option,
+                                          style: AppTextStyles.bodyLarge,
+                                        ),
+                                        if (bilingual &&
+                                            question
+                                                .teForOption(option)
+                                                .isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            question.teForOption(option),
+                                            style: AppTextStyles.bodyMedium
+                                                .copyWith(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
                                   if (selected)

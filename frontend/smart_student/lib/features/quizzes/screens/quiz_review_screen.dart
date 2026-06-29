@@ -11,6 +11,8 @@ class QuizReviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // English subject is English-only; all other subjects show Telugu too.
+    final bilingual = result.subject.toLowerCase() != 'english';
     return Scaffold(
       appBar: AppBar(title: const Text('Review Answers')),
       body: ListView.separated(
@@ -21,6 +23,7 @@ class QuizReviewScreen extends StatelessWidget {
           return _ReviewCard(
             index: index,
             answer: result.answers[index],
+            bilingual: bilingual,
           );
         },
       ),
@@ -31,8 +34,13 @@ class QuizReviewScreen extends StatelessWidget {
 class _ReviewCard extends StatelessWidget {
   final int index;
   final AnswerRecord answer;
+  final bool bilingual;
 
-  const _ReviewCard({required this.index, required this.answer});
+  const _ReviewCard({
+    required this.index,
+    required this.answer,
+    required this.bilingual,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +69,20 @@ class _ReviewCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(answer.question, style: AppTextStyles.titleMedium),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(answer.question, style: AppTextStyles.titleMedium),
+                    if (bilingual && answer.questionTe.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        answer.questionTe,
+                        style: AppTextStyles.bodyMedium
+                            .copyWith(color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ],
+                ),
               ),
               Container(
                 padding:
@@ -115,7 +136,21 @@ class _ReviewCard extends StatelessWidget {
                       size: 20, color: iconColor),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Text(option, style: AppTextStyles.bodyMedium),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(option, style: AppTextStyles.bodyMedium),
+                        if (bilingual &&
+                            answer.teForOption(option).isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            answer.teForOption(option),
+                            style: AppTextStyles.labelMedium
+                                .copyWith(color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                   if (isSelected)
                     Text(
@@ -143,9 +178,22 @@ class _ReviewCard extends StatelessWidget {
                       size: 18, color: AppColors.primaryBlue),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      answer.explanation,
-                      style: AppTextStyles.bodyMedium,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          answer.explanation,
+                          style: AppTextStyles.bodyMedium,
+                        ),
+                        if (bilingual && answer.explanationTe.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            answer.explanationTe,
+                            style: AppTextStyles.bodyMedium
+                                .copyWith(color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ],

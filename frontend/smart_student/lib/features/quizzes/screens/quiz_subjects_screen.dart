@@ -17,21 +17,14 @@ import '../quiz_ui.dart';
 /// showing the user's progress.
 class QuizSubjectsScreen extends StatelessWidget {
   final String classLevel;
-  final String language;
 
-  const QuizSubjectsScreen({
-    super.key,
-    required this.classLevel,
-    required this.language,
-  });
+  const QuizSubjectsScreen({super.key, required this.classLevel});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '${AcademicConstants.formatLevel(classLevel)} • $language',
-        ),
+        title: Text(AcademicConstants.formatLevel(classLevel)),
       ),
       body: BlocBuilder<QuizSubjectsCubit, QuizSubjectsState>(
         builder: (context, state) {
@@ -63,7 +56,6 @@ class QuizSubjectsScreen extends StatelessWidget {
                 separatorBuilder: (_, _) => const SizedBox(height: 14),
                 itemBuilder: (context, index) => _SubjectCard(
                   info: state.subjects[index],
-                  language: language,
                 ),
               ),
             );
@@ -77,9 +69,8 @@ class QuizSubjectsScreen extends StatelessWidget {
 
 class _SubjectCard extends StatelessWidget {
   final SubjectQuizInfo info;
-  final String language;
 
-  const _SubjectCard({required this.info, required this.language});
+  const _SubjectCard({required this.info});
 
   void _start(BuildContext context, {bool practiceAgain = false}) {
     final attempt = context
@@ -121,7 +112,7 @@ class _SubjectCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AcademicConstants.formatSubject(info.subject, language),
+                      info.subject,
                       style: AppTextStyles.titleMedium,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

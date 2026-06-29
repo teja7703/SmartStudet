@@ -10,6 +10,11 @@ class QuestionModel {
   final String difficulty;
   final int points;
 
+  // Telugu translations (optional). `optionsTe` is parallel to `options`.
+  final String questionTe;
+  final List<String> optionsTe;
+  final String explanationTe;
+
   const QuestionModel({
     required this.id,
     required this.question,
@@ -21,6 +26,9 @@ class QuestionModel {
     required this.language,
     required this.difficulty,
     required this.points,
+    this.questionTe = '',
+    this.optionsTe = const [],
+    this.explanationTe = '',
   });
 
   factory QuestionModel.fromJson(Map<String, dynamic> json) {
@@ -38,11 +46,18 @@ class QuestionModel {
           : 'English',
       difficulty: json['difficulty']?.toString() ?? 'Easy',
       points: (json['points'] is num) ? (json['points'] as num).toInt() : 10,
+      questionTe: json['questionTe']?.toString() ?? '',
+      optionsTe: List<String>.from(json['optionsTe'] ?? const []),
+      explanationTe: json['explanationTe']?.toString() ?? '',
     );
   }
 
-  /// Returns a copy with options reordered (used to randomize answer order).
-  QuestionModel copyWith({List<String>? options}) {
+  /// Returns a copy with options (and their parallel Telugu) reordered, used
+  /// to randomize answer order while keeping translations aligned.
+  QuestionModel copyWith({
+    List<String>? options,
+    List<String>? optionsTe,
+  }) {
     return QuestionModel(
       id: id,
       question: question,
@@ -54,7 +69,17 @@ class QuestionModel {
       language: language,
       difficulty: difficulty,
       points: points,
+      questionTe: questionTe,
+      optionsTe: optionsTe ?? this.optionsTe,
+      explanationTe: explanationTe,
     );
+  }
+
+  /// Telugu translation for a given English [option], matched by position.
+  String teForOption(String option) {
+    final i = options.indexOf(option);
+    if (i < 0 || i >= optionsTe.length) return '';
+    return optionsTe[i];
   }
 
   Map<String, dynamic> toJson() => {
@@ -68,5 +93,8 @@ class QuestionModel {
         'language': language,
         'difficulty': difficulty,
         'points': points,
+        'questionTe': questionTe,
+        'optionsTe': optionsTe,
+        'explanationTe': explanationTe,
       };
 }

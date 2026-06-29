@@ -11,30 +11,22 @@ import 'quiz_subjects_state.dart';
 class QuizSubjectsCubit extends Cubit<QuizSubjectsState> {
   final QuizRepository _repository;
   final String classLevel;
-  final String language;
 
   QuizSubjectsCubit({
     required QuizRepository repository,
     required this.classLevel,
-    required this.language,
   })  : _repository = repository,
         super(const QuizSubjectsLoading());
 
   Future<void> load() async {
     emit(const QuizSubjectsLoading());
     try {
-      final pools = await _repository.getSubjects(
-        classLevel: classLevel,
-        language: language,
-      );
+      final pools = await _repository.getSubjects(classLevel: classLevel);
       if (pools.isEmpty) {
         emit(const QuizSubjectsEmpty());
         return;
       }
-      final stats = await _repository.getQuizStats(
-        classLevel: classLevel,
-        language: language,
-      );
+      final stats = await _repository.getQuizStats(classLevel: classLevel);
       final subjects = pools
           .map((pool) => SubjectQuizInfo(
                 pool: pool,

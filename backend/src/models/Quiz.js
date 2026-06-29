@@ -26,6 +26,24 @@ const quizSchema = new mongoose.Schema(
       default: '',
     },
 
+    // ---- Telugu translations (optional) ----------------------------------
+    // When present, the app shows English first and Telugu directly below.
+    // `optionsTe` must be parallel to `options` (same order/length).
+    questionTe: {
+      type: String,
+      default: '',
+    },
+
+    optionsTe: {
+      type: [String],
+      default: [],
+    },
+
+    explanationTe: {
+      type: String,
+      default: '',
+    },
+
     category: {
       type: String,
       required: true,

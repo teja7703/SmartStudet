@@ -38,7 +38,7 @@ class QuizzesScreen extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12),
               child: _ClassCard(
                 title: AcademicConstants.formatLevel(level),
-                onTap: () => context.push('/quizzes/$level/language'),
+                onTap: () => context.push('/quizzes/$level/subjects'),
               ),
             ),
           ),

@@ -117,14 +117,10 @@ QuizPlayCubit createQuizPlayCubit(QuizModel quiz) {
   return QuizPlayCubit(quiz: quiz, repository: getIt<QuizRepository>());
 }
 
-QuizSubjectsCubit createQuizSubjectsCubit({
-  required String classLevel,
-  required String language,
-}) {
+QuizSubjectsCubit createQuizSubjectsCubit({required String classLevel}) {
   return QuizSubjectsCubit(
     repository: getIt<QuizRepository>(),
     classLevel: classLevel,
-    language: language,
   );
 }
 

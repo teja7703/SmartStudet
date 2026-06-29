@@ -55,6 +55,7 @@ dependencies:
   # regular dependency (the CLI generator works the same).
   flutter_native_splash: ^2.4.6
   flutter_markdown: ^0.7.4+3
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:

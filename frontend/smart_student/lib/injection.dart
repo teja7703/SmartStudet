@@ -10,6 +10,7 @@ import 'features/home/repositories/dashboard_repository.dart';
 import 'features/previous_papers/cubit/previous_paper_cubit.dart';
 import 'features/previous_papers/repositories/previous_paper_repository.dart';
 import 'features/progress/cubit/progress_cubit.dart';
+import 'features/progress/repositories/progress_repository.dart';
 import 'features/quizzes/cubit/quiz_cubit.dart';
 import 'features/quizzes/cubit/quiz_play_cubit.dart';
 import 'features/quizzes/models/quiz_model.dart';
@@ -61,9 +62,7 @@ Future<void> setupDependencies() async {
     ),
   );
 
-  getIt.registerFactory<AuthCubit>(
-    () => AuthCubit(getIt<AuthRepository>()),
-  );
+  getIt.registerFactory<AuthCubit>(() => AuthCubit(getIt<AuthRepository>()));
   getIt.registerFactory<DashboardCubit>(
     () => DashboardCubit(getIt<DashboardRepository>()),
   );
@@ -73,14 +72,18 @@ Future<void> setupDependencies() async {
   getIt.registerFactory<StoryCubit>(
     () => StoryCubit(getIt<StoryRepository>(), getIt<StorageService>()),
   );
-  getIt.registerFactory<QuizCubit>(
-    () => QuizCubit(getIt<QuizRepository>()),
-  );
+  getIt.registerFactory<QuizCubit>(() => QuizCubit(getIt<QuizRepository>()));
   getIt.registerFactory<SmartGptCubit>(
     () => SmartGptCubit(getIt<SmartGptRepository>()),
   );
+  getIt.registerLazySingleton<ProgressRepository>(
+    () => ProgressRepository(
+      apiClient: getIt<ApiClient>(),
+      storage: getIt<StorageService>(),
+    ),
+  );
   getIt.registerLazySingleton<ProgressCubit>(
-    () => ProgressCubit(getIt<StorageService>()),
+    () => ProgressCubit(getIt<ProgressRepository>()),
   );
 }
 
@@ -110,10 +113,7 @@ SmartGptCubit createSmartGptCubit() {
 }
 
 QuizPlayCubit createQuizPlayCubit(QuizModel quiz) {
-  return QuizPlayCubit(
-    quiz: quiz,
-    repository: getIt<QuizRepository>(),
-  );
+  return QuizPlayCubit(quiz: quiz, repository: getIt<QuizRepository>());
 }
 
 PreviousPaperCubit createPreviousPaperCubit({

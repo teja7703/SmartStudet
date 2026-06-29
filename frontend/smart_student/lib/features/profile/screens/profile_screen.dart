@@ -91,15 +91,22 @@ class ProfileScreen extends StatelessWidget {
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: () async {
+                          final progress = context.read<ProgressCubit>();
                           await context.read<AuthCubit>().signOut();
+                          // Drop the signed-out user's in-memory stats so the
+                          // next account never sees them.
+                          progress.reset();
                           if (context.mounted) context.go('/login');
                         },
-                        icon: const Icon(Icons.logout_rounded,
-                            color: AppColors.accentRed),
+                        icon: const Icon(
+                          Icons.logout_rounded,
+                          color: AppColors.accentRed,
+                        ),
                         label: Text(
                           'Logout',
-                          style: AppTextStyles.labelLarge
-                              .copyWith(color: AppColors.accentRed),
+                          style: AppTextStyles.labelLarge.copyWith(
+                            color: AppColors.accentRed,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: AppColors.accentRed),
@@ -109,8 +116,10 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Center(
-                      child: Text('Smart Student • v1.0.0',
-                          style: AppTextStyles.labelMedium),
+                      child: Text(
+                        'Smart Student • v1.0.0',
+                        style: AppTextStyles.labelMedium,
+                      ),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -124,9 +133,9 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _comingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature is coming soon!')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$feature is coming soon!')));
   }
 
   void _changeLanguage(BuildContext context) {
@@ -137,17 +146,19 @@ class ProfileScreen extends StatelessWidget {
       ),
       builder: (ctx) {
         Widget option(String label, String sub) => ListTile(
-              leading: const Icon(Icons.language_rounded,
-                  color: AppColors.accentPurple),
-              title: Text(label, style: AppTextStyles.titleMedium),
-              subtitle: Text(sub, style: AppTextStyles.labelMedium),
-              onTap: () {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Language preference: $label')),
-                );
-              },
+          leading: const Icon(
+            Icons.language_rounded,
+            color: AppColors.accentPurple,
+          ),
+          title: Text(label, style: AppTextStyles.titleMedium),
+          subtitle: Text(sub, style: AppTextStyles.labelMedium),
+          onTap: () {
+            Navigator.pop(ctx);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Language preference: $label')),
             );
+          },
+        );
         return Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -208,8 +219,10 @@ class ProfileScreen extends StatelessWidget {
               else
                 ...bookmarks.map(
                   (id) => ListTile(
-                    leading: const Icon(Icons.bookmark_rounded,
-                        color: AppColors.accentOrange),
+                    leading: const Icon(
+                      Icons.bookmark_rounded,
+                      color: AppColors.accentOrange,
+                    ),
                     title: Text('Story $id'),
                     onTap: () {
                       Navigator.pop(context);
@@ -261,8 +274,7 @@ class _Header extends StatelessWidget {
                   backgroundColor: Colors.white.withValues(alpha: 0.22),
                   backgroundImage: provider,
                   child: provider == null
-                      ? const Icon(Icons.person,
-                          size: 44, color: Colors.white)
+                      ? const Icon(Icons.person, size: 44, color: Colors.white)
                       : null,
                 );
               },
@@ -276,15 +288,17 @@ class _Header extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 user!.email,
-                style: AppTextStyles.bodyMedium
-                    .copyWith(color: Colors.white.withValues(alpha: 0.85)),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.white.withValues(alpha: 0.85),
+                ),
               ),
             ] else if ((user?.phone ?? '').isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 user!.phone,
-                style: AppTextStyles.bodyMedium
-                    .copyWith(color: Colors.white.withValues(alpha: 0.85)),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Colors.white.withValues(alpha: 0.85),
+                ),
               ),
             ],
             const SizedBox(height: 16),

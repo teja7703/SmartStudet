@@ -82,21 +82,28 @@ class GamesScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.videogame_asset_rounded,
-                    color: Colors.white, size: 38),
+                const Icon(
+                  Icons.videogame_asset_rounded,
+                  color: Colors.white,
+                  size: 38,
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Brain Games',
-                          style: AppTextStyles.titleLarge
-                              .copyWith(color: Colors.white)),
+                      Text(
+                        'Brain Games',
+                        style: AppTextStyles.titleLarge.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         'Take a fun break and sharpen your mind!',
-                        style: AppTextStyles.bodyMedium
-                            .copyWith(color: Colors.white70),
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.white70,
+                        ),
                       ),
                     ],
                   ),
@@ -112,9 +119,7 @@ class GamesScreen extends StatelessWidget {
             crossAxisSpacing: 14,
             mainAxisSpacing: 14,
             childAspectRatio: 1.05,
-            children: _games
-                .map((game) => _GameCard(game: game))
-                .toList(),
+            children: _games.map((game) => _GameCard(game: game)).toList(),
           ),
         ],
       ),
@@ -163,10 +168,12 @@ class _GameCard extends StatelessWidget {
               const SizedBox(height: 12),
               Text(game.title, style: AppTextStyles.titleMedium),
               const SizedBox(height: 2),
-              Text(game.subtitle,
-                  style: AppTextStyles.bodyMedium.copyWith(fontSize: 12),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis),
+              Text(
+                game.subtitle,
+                style: AppTextStyles.bodyMedium.copyWith(fontSize: 12),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
           ),
         ),

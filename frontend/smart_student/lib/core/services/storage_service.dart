@@ -2,13 +2,43 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
 
+/// Local key/value cache.
+///
+/// IMPORTANT: every per-user value (quiz history, recent activity, SmartGPT
+/// chats, bookmarks, read progress) is stored under a key that is **namespaced
+/// by the active Firebase UID**, so two accounts on the same device never see
+/// each other's cached data. The backend remains the source of truth; these
+/// keys are an offline cache only.
+///
+/// Call [setActiveUser] right after a user is resolved (login / app start) and
+/// [clearActiveUserCache] on logout.
 class StorageService {
   SharedPreferences? _prefs;
+
+  /// The Firebase UID the cache is currently scoped to. Empty when nobody is
+  /// signed in.
+  String _activeUid = '';
 
   Future<SharedPreferences> get prefs async {
     _prefs ??= await SharedPreferences.getInstance();
     return _prefs!;
   }
+
+  void setActiveUser(String? uid) {
+    _activeUid = (uid ?? '').trim();
+  }
+
+  String get activeUid => _activeUid;
+
+  /// Returns [baseKey] namespaced by the active user, e.g.
+  /// `quiz_history__<uid>`. Falls back to an `__anon` namespace when signed out.
+  String _scoped(String baseKey) {
+    final uid = _activeUid.isEmpty ? '__anon' : _activeUid;
+    return '${baseKey}__$uid';
+  }
+
+  // ---- Session user (the "who is logged in" pointer) --------------------
+  // Kept global; replaced on each login and removed on logout.
 
   Future<void> saveUser(Map<String, dynamic> user) async {
     final p = await prefs;
@@ -27,9 +57,11 @@ class StorageService {
     await p.remove(AppConstants.userKey);
   }
 
+  // ---- Bookmarks (per user) ---------------------------------------------
+
   Future<Set<String>> getBookmarkedStories() async {
     final p = await prefs;
-    return p.getStringList(AppConstants.bookmarksKey)?.toSet() ?? {};
+    return p.getStringList(_scoped(AppConstants.bookmarksKey))?.toSet() ?? {};
   }
 
   Future<void> toggleBookmark(String storyId) async {
@@ -40,7 +72,10 @@ class StorageService {
     } else {
       bookmarks.add(storyId);
     }
-    await p.setStringList(AppConstants.bookmarksKey, bookmarks.toList());
+    await p.setStringList(
+      _scoped(AppConstants.bookmarksKey),
+      bookmarks.toList(),
+    );
   }
 
   Future<bool> isBookmarked(String storyId) async {
@@ -48,43 +83,50 @@ class StorageService {
     return bookmarks.contains(storyId);
   }
 
+  // ---- Read progress (per user, per story) ------------------------------
+
   Future<void> saveReadProgress(String storyId, double progress) async {
     final p = await prefs;
-    final key = '${AppConstants.readProgressKey}_$storyId';
+    final key = '${_scoped(AppConstants.readProgressKey)}_$storyId';
     await p.setDouble(key, progress);
   }
 
   Future<double> getReadProgress(String storyId) async {
     final p = await prefs;
-    final key = '${AppConstants.readProgressKey}_$storyId';
+    final key = '${_scoped(AppConstants.readProgressKey)}_$storyId';
     return p.getDouble(key) ?? 0.0;
   }
 
+  // ---- Quiz history (per user) ------------------------------------------
+
   Future<List<Map<String, dynamic>>> getQuizHistory() async {
     final p = await prefs;
-    final raw = p.getStringList(AppConstants.quizHistoryKey) ?? [];
-    return raw
-        .map((e) => jsonDecode(e) as Map<String, dynamic>)
-        .toList();
+    final raw = p.getStringList(_scoped(AppConstants.quizHistoryKey)) ?? [];
+    return raw.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
   }
 
   Future<void> addQuizResult(Map<String, dynamic> result) async {
     final p = await prefs;
-    final raw = p.getStringList(AppConstants.quizHistoryKey) ?? [];
+    final raw = p.getStringList(_scoped(AppConstants.quizHistoryKey)) ?? [];
     raw.insert(0, jsonEncode(result));
-    // Keep only the latest 50 attempts.
     final trimmed = raw.take(50).toList();
-    await p.setStringList(AppConstants.quizHistoryKey, trimmed);
+    await p.setStringList(_scoped(AppConstants.quizHistoryKey), trimmed);
+  }
+
+  /// Replaces the cached quiz history (used when syncing from the backend).
+  Future<void> setQuizHistory(List<Map<String, dynamic>> results) async {
+    final p = await prefs;
+    final raw = results.take(50).map(jsonEncode).toList();
+    await p.setStringList(_scoped(AppConstants.quizHistoryKey), raw);
   }
 
   Future<void> clearQuizHistory() async {
     final p = await prefs;
-    await p.remove(AppConstants.quizHistoryKey);
+    await p.remove(_scoped(AppConstants.quizHistoryKey));
   }
 
-  /// Records a visited item (study material, story, etc.) for the
-  /// "Your Progress" / recent activity section. Newest first, de-duplicated
-  /// by type+id, capped at 30 entries.
+  // ---- Recent activity (per user) ---------------------------------------
+
   Future<void> recordActivity({
     required String type,
     required String id,
@@ -92,7 +134,7 @@ class StorageService {
     String subtitle = '',
   }) async {
     final p = await prefs;
-    final raw = p.getStringList(AppConstants.activityKey) ?? [];
+    final raw = p.getStringList(_scoped(AppConstants.activityKey)) ?? [];
     final list = raw
         .map((e) => jsonDecode(e) as Map<String, dynamic>)
         .where((e) => !(e['type'] == type && e['id'] == id))
@@ -105,57 +147,87 @@ class StorageService {
       'ts': DateTime.now().toIso8601String(),
     });
     final trimmed = list.take(30).map(jsonEncode).toList();
-    await p.setStringList(AppConstants.activityKey, trimmed);
+    await p.setStringList(_scoped(AppConstants.activityKey), trimmed);
   }
 
   Future<List<Map<String, dynamic>>> getRecentActivity() async {
     final p = await prefs;
-    final raw = p.getStringList(AppConstants.activityKey) ?? [];
+    final raw = p.getStringList(_scoped(AppConstants.activityKey)) ?? [];
     return raw.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
   }
 
   Future<void> clearActivity() async {
     final p = await prefs;
-    await p.remove(AppConstants.activityKey);
+    await p.remove(_scoped(AppConstants.activityKey));
   }
 
-  // ---- SmartGPT chat history --------------------------------------------
+  // ---- SmartGPT chat history (per user) ---------------------------------
 
   Future<List<Map<String, dynamic>>> getSmartGptConversations() async {
     final p = await prefs;
-    final raw = p.getStringList(AppConstants.smartGptHistoryKey) ?? [];
+    final raw = p.getStringList(_scoped(AppConstants.smartGptHistoryKey)) ?? [];
     return raw.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
   }
 
-  /// Inserts or updates a conversation (matched by id), keeping the newest
-  /// first and capping the history at 50 conversations.
   Future<void> saveSmartGptConversation(
     Map<String, dynamic> conversation,
   ) async {
     final p = await prefs;
-    final raw = p.getStringList(AppConstants.smartGptHistoryKey) ?? [];
+    final raw = p.getStringList(_scoped(AppConstants.smartGptHistoryKey)) ?? [];
     final list = raw
         .map((e) => jsonDecode(e) as Map<String, dynamic>)
         .where((e) => e['id'] != conversation['id'])
         .toList();
     list.insert(0, conversation);
     final trimmed = list.take(50).map(jsonEncode).toList();
-    await p.setStringList(AppConstants.smartGptHistoryKey, trimmed);
+    await p.setStringList(_scoped(AppConstants.smartGptHistoryKey), trimmed);
+  }
+
+  /// Replaces the cached conversations (used when syncing from the backend).
+  Future<void> setSmartGptConversations(
+    List<Map<String, dynamic>> conversations,
+  ) async {
+    final p = await prefs;
+    final raw = conversations.take(50).map(jsonEncode).toList();
+    await p.setStringList(_scoped(AppConstants.smartGptHistoryKey), raw);
   }
 
   Future<void> deleteSmartGptConversation(String id) async {
     final p = await prefs;
-    final raw = p.getStringList(AppConstants.smartGptHistoryKey) ?? [];
+    final raw = p.getStringList(_scoped(AppConstants.smartGptHistoryKey)) ?? [];
     final list = raw
         .map((e) => jsonDecode(e) as Map<String, dynamic>)
         .where((e) => e['id'] != id)
         .map(jsonEncode)
         .toList();
-    await p.setStringList(AppConstants.smartGptHistoryKey, list);
+    await p.setStringList(_scoped(AppConstants.smartGptHistoryKey), list);
   }
 
   Future<void> clearSmartGptHistory() async {
     final p = await prefs;
-    await p.remove(AppConstants.smartGptHistoryKey);
+    await p.remove(_scoped(AppConstants.smartGptHistoryKey));
+  }
+
+  // ---- Logout cleanup ---------------------------------------------------
+
+  /// Removes the session pointer plus every cached value belonging to the
+  /// currently active user. Call this on logout so the next account starts
+  /// completely clean.
+  Future<void> clearActiveUserCache() async {
+    final p = await prefs;
+    await p.remove(AppConstants.userKey);
+    await p.remove(_scoped(AppConstants.bookmarksKey));
+    await p.remove(_scoped(AppConstants.quizHistoryKey));
+    await p.remove(_scoped(AppConstants.activityKey));
+    await p.remove(_scoped(AppConstants.smartGptHistoryKey));
+
+    // Read-progress is one key per story — remove every key in this user's
+    // read-progress namespace.
+    final readPrefix = _scoped(AppConstants.readProgressKey);
+    for (final key in p.getKeys()) {
+      if (key.startsWith(readPrefix)) {
+        await p.remove(key);
+      }
+    }
   }
 }

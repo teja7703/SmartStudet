@@ -50,6 +50,16 @@ app.use('/api/dashboard', dashboardRoutes);
 const aiRoutes = require('./routes/aiRoutes');
 app.use('/api/ai', aiRoutes);
 
+// ---- Per-user (Firebase UID scoped) data -------------------------------
+const progressRoutes = require('./routes/progressRoutes');
+app.use('/api/progress', progressRoutes);
+
+const activityRoutes = require('./routes/activityRoutes');
+app.use('/api/activity', activityRoutes);
+
+const smartGptRoutes = require('./routes/smartGptRoutes');
+app.use('/api/smartgpt', smartGptRoutes);
+
 app.get('/', (req, res) => {
   res.json({
     success: true,

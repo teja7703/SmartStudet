@@ -79,16 +79,41 @@ class QuizRepository {
     return catalog;
   }
 
+  /// Quiz history for the signed-in user. Fetched from the backend (source of
+  /// truth, scoped by Firebase UID) and mirrored into the local cache; falls
+  /// back to the cache when offline.
   Future<List<QuizResultModel>> getHistory() async {
-    final raw = await _storageService.getQuizHistory();
-    return raw.map((e) => QuizResultModel.fromJson(e)).toList();
+    try {
+      final response = await _apiClient.get('/api/progress/quiz-results');
+      final List data = response.data['data'] ?? [];
+      final results = data
+          .map((e) => QuizResultModel.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+      await _storageService.setQuizHistory(
+        results.map((r) => r.toJson()).toList(),
+      );
+      return results;
+    } catch (_) {
+      final raw = await _storageService.getQuizHistory();
+      return raw.map((e) => QuizResultModel.fromJson(e)).toList();
+    }
   }
 
   Future<void> saveResult(QuizResultModel result) async {
+    // Cache locally first so it survives even if the network call fails.
     await _storageService.addQuizResult(result.toJson());
+    await _apiClient.post(
+      '/api/progress/quiz-results',
+      data: result.toJson(),
+    );
   }
 
   Future<void> clearHistory() async {
     await _storageService.clearQuizHistory();
+    try {
+      await _apiClient.delete('/api/progress/quiz-results');
+    } catch (_) {
+      // Best-effort; the local cache is already cleared.
+    }
   }
 }

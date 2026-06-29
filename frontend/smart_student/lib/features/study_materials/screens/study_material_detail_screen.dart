@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/academic_constants.dart';
-import '../../../core/services/storage_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../injection.dart';
+import '../../progress/repositories/progress_repository.dart';
 import '../models/study_material_model.dart';
 import '../services/study_material_pdf.dart';
 import '../widgets/study_content_view.dart';
@@ -14,10 +14,7 @@ import '../widgets/study_content_view.dart';
 class StudyMaterialDetailScreen extends StatefulWidget {
   final StudyMaterialModel material;
 
-  const StudyMaterialDetailScreen({
-    super.key,
-    required this.material,
-  });
+  const StudyMaterialDetailScreen({super.key, required this.material});
 
   @override
   State<StudyMaterialDetailScreen> createState() =>
@@ -36,7 +33,7 @@ class _StudyMaterialDetailScreenState extends State<StudyMaterialDetailScreen> {
       if (material.subject.isNotEmpty) material.subject,
       if (material.academicLevel.isNotEmpty) material.academicLevel,
     ];
-    getIt<StorageService>().recordActivity(
+    getIt<ProgressRepository>().recordActivity(
       type: 'material',
       id: material.id,
       title: material.chapter.isNotEmpty ? material.chapter : material.title,
@@ -62,9 +59,9 @@ class _StudyMaterialDetailScreenState extends State<StudyMaterialDetailScreen> {
       await OpenFilex.open(path);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not create PDF: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not create PDF: $e')));
       }
     } finally {
       if (mounted) setState(() => _generatingPdf = false);
@@ -76,7 +73,10 @@ class _StudyMaterialDetailScreenState extends State<StudyMaterialDetailScreen> {
     final isTelugu = material.language == 'Telugu';
     final parts = <String>[
       if (material.academicLevel.isNotEmpty)
-        AcademicConstants.formatLevel(material.academicLevel, material.language),
+        AcademicConstants.formatLevel(
+          material.academicLevel,
+          material.language,
+        ),
       if (material.subject.isNotEmpty)
         AcademicConstants.formatSubject(material.subject, material.language),
       material.chapter,
@@ -90,9 +90,9 @@ class _StudyMaterialDetailScreenState extends State<StudyMaterialDetailScreen> {
     final uri = Uri.parse(_youtubeUrl());
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open YouTube')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Could not open YouTube')));
     }
   }
 

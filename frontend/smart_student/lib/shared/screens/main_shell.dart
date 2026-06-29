@@ -64,9 +64,7 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
-    _currentIndex = _tabs.indexWhere(
-      (tab) => location.startsWith(tab.path),
-    );
+    _currentIndex = _tabs.indexWhere((tab) => location.startsWith(tab.path));
     if (_currentIndex < 0) _currentIndex = 0;
 
     return Scaffold(
@@ -142,10 +140,7 @@ class ComingSoonScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                'Coming Soon!',
-                style: AppTextStyles.headlineLarge,
-              ),
+              Text('Coming Soon!', style: AppTextStyles.headlineLarge),
               const SizedBox(height: 8),
               Text(
                 '$feature module is under development.\nStay tuned for updates!',

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../core/services/storage_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/error_state_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/network_image_box.dart';
 import '../../../injection.dart';
+import '../../progress/repositories/progress_repository.dart';
 import '../models/story_model.dart';
 import '../cubit/story_cubit.dart';
 import '../cubit/story_state.dart';
@@ -35,7 +35,7 @@ class _StoryDetailScreenState extends State<StoryDetailScreen> {
   void _recordVisit(StoryModel story) {
     if (_visitRecorded) return;
     _visitRecorded = true;
-    getIt<StorageService>().recordActivity(
+    getIt<ProgressRepository>().recordActivity(
       type: 'story',
       id: story.id,
       title: story.title,
@@ -167,7 +167,9 @@ class _Detail extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.accentRed.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
@@ -187,10 +189,13 @@ class _Detail extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               radius: 16,
-                              backgroundColor:
-                                  AppColors.accentPurple.withValues(alpha: 0.15),
-                              child: Icon(Icons.person_rounded,
-                                  size: 18, color: AppColors.accentPurple),
+                              backgroundColor: AppColors.accentPurple
+                                  .withValues(alpha: 0.15),
+                              child: Icon(
+                                Icons.person_rounded,
+                                size: 18,
+                                color: AppColors.accentPurple,
+                              ),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -258,8 +263,11 @@ class _LessonCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.lightbulb_rounded,
-              color: AppColors.secondaryGreen, size: 26),
+          const Icon(
+            Icons.lightbulb_rounded,
+            color: AppColors.secondaryGreen,
+            size: 26,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

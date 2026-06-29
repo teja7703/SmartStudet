@@ -1,10 +1,9 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/avatar_image.dart';
@@ -47,16 +46,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final picker = ImagePicker();
       final picked = await picker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 800,
-        imageQuality: 85,
+        // Keep it small: stored as a base64 data URI on the backend so the
+        // avatar follows the account to any device.
+        maxWidth: 400,
+        maxHeight: 400,
+        imageQuality: 70,
       );
       if (picked == null) return;
 
-      final dir = await getApplicationDocumentsDirectory();
-      final fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final saved = await File(picked.path).copy('${dir.path}/$fileName');
+      final bytes = await picked.readAsBytes();
+      final dataUri = 'data:image/jpeg;base64,${base64Encode(bytes)}';
 
-      setState(() => _photoUrl = saved.path);
+      setState(() => _photoUrl = dataUri);
     } catch (_) {
       if (mounted) _snack('Could not pick image. Please try again.');
     }

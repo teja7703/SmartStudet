@@ -40,10 +40,7 @@ class SmartGptCubit extends Cubit<SmartGptState> {
       if (isClosed) return;
       emit(
         state.copyWith(
-          messages: [
-            ...state.messages,
-            SmartGptMessage.ai(_nextId(), answer),
-          ],
+          messages: [...state.messages, SmartGptMessage.ai(_nextId(), answer)],
           isAwaitingResponse: false,
         ),
       );

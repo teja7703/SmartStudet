@@ -18,10 +18,6 @@ router.post("/ask", async (req, res) => {
       });
     }
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-    });
-
     const prompt = `
 You are Smart Student AI Tutor.
 
@@ -37,7 +33,19 @@ Question:
 ${question}
 `;
 
-    const result = await model.generateContent(prompt);
+    let result;
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+      });
+      result = await model.generateContent(prompt);
+    } catch (e) {
+      console.log("2.5 Flash failed, trying 1.5 Flash");
+      const fallbackModel = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+      });
+      result = await fallbackModel.generateContent(prompt);
+    }
 
     res.json({
       success: true,

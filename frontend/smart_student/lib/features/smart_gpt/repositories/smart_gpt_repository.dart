@@ -84,22 +84,56 @@ class SmartGptRepository {
     }
   }
 
-  // ---- Chat history -----------------------------------------------------
+  // ---- Chat history (per user, backed by the server) --------------------
 
+  /// Chat history for the signed-in user. Fetched from the backend (scoped by
+  /// Firebase UID) and mirrored locally; falls back to the cache when offline.
   Future<List<SmartGptConversation>> getConversations() async {
-    final raw = await _storageService.getSmartGptConversations();
-    return raw.map(SmartGptConversation.fromJson).toList();
+    try {
+      final response = await _apiClient.get('/api/smartgpt/conversations');
+      final List data = response.data['data'] ?? [];
+      final conversations = data
+          .map((e) => SmartGptConversation.fromJson(
+                Map<String, dynamic>.from(e),
+              ))
+          .toList();
+      await _storageService.setSmartGptConversations(
+        conversations.map((c) => c.toJson()).toList(),
+      );
+      return conversations;
+    } catch (_) {
+      final raw = await _storageService.getSmartGptConversations();
+      return raw.map(SmartGptConversation.fromJson).toList();
+    }
   }
 
   Future<void> saveConversation(SmartGptConversation conversation) async {
     await _storageService.saveSmartGptConversation(conversation.toJson());
+    try {
+      await _apiClient.put(
+        '/api/smartgpt/conversations',
+        data: conversation.toJson(),
+      );
+    } catch (_) {
+      // Best-effort; the local mirror already has it.
+    }
   }
 
   Future<void> deleteConversation(String id) async {
     await _storageService.deleteSmartGptConversation(id);
+    try {
+      await _apiClient.delete('/api/smartgpt/conversations/$id');
+    } catch (_) {
+      // Best-effort.
+    }
   }
 
   Future<void> clearHistory() async {
     await _storageService.clearSmartGptHistory();
+    try {
+      await _apiClient.delete('/api/smartgpt/conversations');
+    } catch (_) {
+      // Best-effort.
+    }
   }
 }

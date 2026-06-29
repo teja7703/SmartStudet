@@ -24,7 +24,24 @@ class AuthRepository {
   Future<UserModel?> getStoredUser() async {
     final data = await _storageService.getUser();
     if (data == null) return null;
-    return UserModel.fromJson(data);
+    final user = UserModel.fromJson(data);
+    // Scope the local cache to this user as early as possible.
+    _storageService.setActiveUser(user.firebaseUid);
+    return user;
+  }
+
+  /// Re-fetches the signed-in user from the backend so points, streak and a
+  /// refreshed photo are always current after login / app start.
+  Future<UserModel?> refreshCurrentUser() async {
+    try {
+      final response = await _apiClient.get('/api/auth/me');
+      final user = UserModel.fromJson(response.data['data']);
+      _storageService.setActiveUser(user.firebaseUid);
+      await _storageService.saveUser(user.toJson());
+      return user;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<UserModel> signInWithGoogle() async {
@@ -131,10 +148,12 @@ class AuthRepository {
 
       final userModel = UserModel.fromJson(response.data['data']);
 
+      // Scope all local cache to this user before anything reads it.
+      _storageService.setActiveUser(userModel.firebaseUid);
       await _storageService.saveUser(userModel.toJson());
 
       return userModel;
-    } catch (e, s) {
+    } catch (_) {
       rethrow;
     }
   }
@@ -175,6 +194,9 @@ class AuthRepository {
   Future<void> signOut() async {
     await _googleSignIn.signOut();
     await _firebaseAuth.signOut();
-    await _storageService.clearUser();
+    // Wipe the signed-out user's entire local cache so the next account that
+    // logs in on this device starts completely clean.
+    await _storageService.clearActiveUserCache();
+    _storageService.setActiveUser('');
   }
 }

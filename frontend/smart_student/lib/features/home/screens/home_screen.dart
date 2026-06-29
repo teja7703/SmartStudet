@@ -92,77 +92,80 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     if (state is DashboardLoading)
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: ShimmerGridLoading(itemCount: 6),
-                      ),
-                    )
-                  else if (state is DashboardError)
-                    SliverFillRemaining(
-                      child: ErrorStateWidget(
-                        message: state.message,
-                        onRetry: () =>
-                            context.read<DashboardCubit>().loadDashboard(),
-                      ),
-                    )
-                  else if (state is DashboardLoaded) ...[
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
-                        child: SectionHeader(title: 'Explore'),
-                      ),
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                      sliver: SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 14,
-                          childAspectRatio: 1.15,
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: ShimmerGridLoading(itemCount: 6),
                         ),
-                        delegate: SliverChildListDelegate(
-                          _quickAccess(context),
+                      )
+                    else if (state is DashboardError)
+                      SliverFillRemaining(
+                        child: ErrorStateWidget(
+                          message: state.message,
+                          onRetry: () =>
+                              context.read<DashboardCubit>().loadDashboard(),
+                        ),
+                      )
+                    else if (state is DashboardLoaded) ...[
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
+                          child: SectionHeader(title: 'Explore'),
                         ),
                       ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
+                      SliverPadding(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                        child: GradientBanner(
-                          title: 'DAILY MOTIVATION',
-                          message: _todaysMotivation(),
-                          icon: Icons.format_quote_rounded,
-                          gradient: AppColors.purpleGradient,
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount:
+                                    MediaQuery.of(context).size.width > 600
+                                    ? 3
+                                    : 2,
+                                crossAxisSpacing: 14,
+                                mainAxisSpacing: 14,
+                                childAspectRatio: 1.15,
+                              ),
+                          delegate: SliverChildListDelegate(
+                            _quickAccess(context),
+                          ),
                         ),
                       ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                        child: GradientBanner(
-                          title: 'DAILY QUIZ',
-                          message:
-                              'Test what you learned today and earn points!',
-                          icon: Icons.bolt_rounded,
-                          gradient: AppColors.orangeGradient,
-                          actionLabel: 'Start Quiz',
-                          onAction: () => context.push('/quizzes'),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                          child: GradientBanner(
+                            title: 'DAILY MOTIVATION',
+                            message: _todaysMotivation(),
+                            icon: Icons.format_quote_rounded,
+                            gradient: AppColors.purpleGradient,
+                          ),
                         ),
                       ),
-                    ),
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
-                        child: SectionHeader(title: 'Your Progress'),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                          child: GradientBanner(
+                            title: 'DAILY QUIZ',
+                            message:
+                                'Test what you learned today and earn points!',
+                            icon: Icons.bolt_rounded,
+                            gradient: AppColors.orangeGradient,
+                            actionLabel: 'Start Quiz',
+                            onAction: () => context.push('/quizzes'),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SliverToBoxAdapter(child: _ProgressSection()),
-                    const SliverToBoxAdapter(child: SizedBox(height: 88)),
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
+                          child: SectionHeader(title: 'Your Progress'),
+                        ),
+                      ),
+                      const SliverToBoxAdapter(child: _ProgressSection()),
+                      const SliverToBoxAdapter(child: SizedBox(height: 88)),
+                    ],
                   ],
-                ],
                 ),
               ),
             );

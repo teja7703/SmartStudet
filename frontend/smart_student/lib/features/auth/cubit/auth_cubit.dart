@@ -13,6 +13,9 @@ class AuthCubit extends Cubit<AuthState> {
       final user = await _repository.getStoredUser();
       if (user != null) {
         emit(AuthAuthenticated(user));
+        // Refresh from the backend so points/streak/photo are current.
+        final fresh = await _repository.refreshCurrentUser();
+        if (fresh != null && !isClosed) emit(AuthAuthenticated(fresh));
       } else {
         emit(AuthUnauthenticated());
       }

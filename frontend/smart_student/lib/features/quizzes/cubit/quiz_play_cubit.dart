@@ -10,11 +10,9 @@ class QuizPlayCubit extends Cubit<QuizPlayState> {
   final QuizRepository _repository;
   Timer? _timer;
 
-  QuizPlayCubit({
-    required QuizModel quiz,
-    required QuizRepository repository,
-  })  : _repository = repository,
-        super(QuizPlayState.initial(quiz)) {
+  QuizPlayCubit({required QuizModel quiz, required QuizRepository repository})
+    : _repository = repository,
+      super(QuizPlayState.initial(quiz)) {
     _startTimer();
   }
 

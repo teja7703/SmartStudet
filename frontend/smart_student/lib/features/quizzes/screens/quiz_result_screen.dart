@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../progress/cubit/progress_cubit.dart';
+import '../../progress/models/progress_stats.dart';
 import '../models/quiz_result_model.dart';
 import '../quiz_ui.dart';
 
@@ -138,10 +139,54 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            BlocBuilder<ProgressCubit, ProgressStats>(
+              builder: (context, stats) {
+                return Row(
+                  children: [
+                    _RewardChip(
+                      icon: Icons.star_rounded,
+                      color: AppColors.accentOrange,
+                      label: '+${result.pointsEarned} points',
+                    ),
+                    const SizedBox(width: 12),
+                    _RewardChip(
+                      icon: Icons.local_fire_department_rounded,
+                      color: AppColors.accentRed,
+                      label: '${stats.streak} day streak',
+                    ),
+                  ],
+                );
+              },
+            ),
+            if (percentage == 100) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: AppColors.greenGradient,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.emoji_events_rounded,
+                        color: Colors.white),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Achievement unlocked: Perfect Score!',
+                      style: AppTextStyles.labelLarge
+                          .copyWith(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: OutlinedButton.icon(
                 onPressed: () =>
                     context.push('/quizzes/review', extra: result),
                 icon: const Icon(Icons.fact_check_rounded),
@@ -149,22 +194,74 @@ class _QuizResultScreenState extends State<QuizResultScreen> {
               ),
             ),
             const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => context.go(
+                  '/quizzes/${result.language}/${result.classLevel}/subjects',
+                ),
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: const Text('Next Quiz'),
+              ),
+            ),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => context.go('/quizzes'),
-                    child: const Text('More Quizzes'),
+                    onPressed: () => context.go('/study-materials'),
+                    child: const Text('Continue Learning'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => context.go('/home'),
-                    child: const Text('Home'),
+                    child: const Text('Go to Home'),
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RewardChip extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+
+  const _RewardChip({
+    required this.icon,
+    required this.color,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTextStyles.labelMedium.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

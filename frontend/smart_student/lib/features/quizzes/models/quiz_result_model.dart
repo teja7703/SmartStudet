@@ -1,5 +1,6 @@
 /// A single answered (or skipped) question within a quiz attempt.
 class AnswerRecord {
+  final String questionId;
   final String question;
   final List<String> options;
   final String correctAnswer;
@@ -7,6 +8,7 @@ class AnswerRecord {
   final String explanation;
 
   const AnswerRecord({
+    this.questionId = '',
     required this.question,
     required this.options,
     required this.correctAnswer,
@@ -19,6 +21,7 @@ class AnswerRecord {
   bool get isCorrect => isAnswered && selectedAnswer == correctAnswer;
 
   Map<String, dynamic> toJson() => {
+        'questionId': questionId,
         'question': question,
         'options': options,
         'correctAnswer': correctAnswer,
@@ -28,6 +31,7 @@ class AnswerRecord {
 
   factory AnswerRecord.fromJson(Map<String, dynamic> json) {
     return AnswerRecord(
+      questionId: json['questionId']?.toString() ?? '',
       question: json['question']?.toString() ?? '',
       options: List<String>.from(json['options'] ?? const []),
       correctAnswer: json['correctAnswer']?.toString() ?? '',
@@ -43,6 +47,7 @@ class QuizResultModel {
   final String title;
   final String subject;
   final String classLevel;
+  final String language;
   final int total;
   final int correct;
   final int pointsEarned;
@@ -56,6 +61,7 @@ class QuizResultModel {
     required this.title,
     required this.subject,
     required this.classLevel,
+    this.language = 'English',
     required this.total,
     required this.correct,
     required this.pointsEarned,
@@ -79,6 +85,7 @@ class QuizResultModel {
         'title': title,
         'subject': subject,
         'classLevel': classLevel,
+        'language': language,
         'total': total,
         'correct': correct,
         'pointsEarned': pointsEarned,
@@ -94,6 +101,9 @@ class QuizResultModel {
       title: json['title']?.toString() ?? '',
       subject: json['subject']?.toString() ?? '',
       classLevel: json['classLevel']?.toString() ?? '',
+      language: json['language']?.toString().isNotEmpty == true
+          ? json['language'].toString()
+          : 'English',
       total: (json['total'] as num?)?.toInt() ?? 0,
       correct: (json['correct'] as num?)?.toInt() ?? 0,
       pointsEarned: (json['pointsEarned'] as num?)?.toInt() ?? 0,

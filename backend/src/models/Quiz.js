@@ -36,6 +36,14 @@ const quizSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Language the question is written in. Legacy questions have no value and
+    // are treated as English.
+    language: {
+      type: String,
+      enum: ['English', 'Telugu'],
+      default: 'English',
+    },
+
     difficulty: {
       type: String,
       enum: ['Easy', 'Medium', 'Hard'],

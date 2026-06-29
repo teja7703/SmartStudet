@@ -5,6 +5,7 @@ const {
   getQuizHistory,
   clearQuizHistory,
   getProgress,
+  getQuizStats,
 } = require('../controllers/progressController');
 const { requireUser } = require('../middleware/auth');
 
@@ -15,6 +16,9 @@ router.use(requireUser);
 
 // Aggregated stats (points, streak, averages, recent activity).
 router.get('/', getProgress);
+
+// Per-subject quiz stats (completed questions, best/avg score) for a class.
+router.get('/quiz-stats', getQuizStats);
 
 // Quiz history (per user).
 router.post('/quiz-results', saveQuizResult);

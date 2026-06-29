@@ -65,6 +65,7 @@ class QuizPlayCubit extends Cubit<QuizPlayState> {
       final q = quiz.questions[i];
       final selected = state.answers[i];
       final record = AnswerRecord(
+        questionId: q.id,
         question: q.question,
         options: q.options,
         correctAnswer: q.correctAnswer,
@@ -85,6 +86,7 @@ class QuizPlayCubit extends Cubit<QuizPlayState> {
       title: quiz.title,
       subject: quiz.subject,
       classLevel: quiz.classLevel,
+      language: quiz.language,
       total: quiz.totalQuestions,
       correct: correct,
       pointsEarned: pointsEarned,

@@ -63,6 +63,7 @@ const saveQuizResult = async (req, res) => {
       title: body.title,
       subject: body.subject,
       classLevel: body.classLevel,
+      language: body.language || 'English',
       total: body.total,
       correct: body.correct,
       pointsEarned: body.pointsEarned,
@@ -194,10 +195,82 @@ const getProgress = async (req, res) => {
   }
 };
 
+// Per-subject quiz stats for a class+language: which questions the user has
+// already completed (so the client can avoid repeating them), plus attempts,
+// best/avg score and last-attempt time. Used by the quiz subjects screen.
+const getQuizStats = async (req, res) => {
+  try {
+    const firebaseUid = req.firebaseUid;
+    const { classLevel, language } = req.query;
+
+    const filter = { firebaseUid };
+    if (classLevel) filter.classLevel = classLevel;
+    if (language === 'Telugu') {
+      filter.language = 'Telugu';
+    } else if (language === 'English') {
+      filter.$or = [
+        { language: 'English' },
+        { language: { $exists: false } },
+        { language: '' },
+      ];
+    }
+
+    const results = await QuizResult.find(filter).lean();
+
+    // subject -> aggregate
+    const bySubject = {};
+    for (const r of results) {
+      const subject = r.subject || 'General';
+      const entry = (bySubject[subject] = bySubject[subject] || {
+        completedQuestionIds: new Set(),
+        attempts: 0,
+        bestScore: 0,
+        scoreSum: 0,
+        lastAttempt: null,
+      });
+
+      entry.attempts += 1;
+      const pct = percentage(r.correct, r.total);
+      entry.bestScore = Math.max(entry.bestScore, pct);
+      entry.scoreSum += pct;
+
+      const when = r.date || r.createdAt;
+      if (!entry.lastAttempt || new Date(when) > new Date(entry.lastAttempt)) {
+        entry.lastAttempt = when;
+      }
+
+      for (const a of r.answers || []) {
+        if (a.questionId) entry.completedQuestionIds.add(a.questionId);
+      }
+    }
+
+    const data = {};
+    for (const [subject, e] of Object.entries(bySubject)) {
+      data[subject] = {
+        completedQuestionIds: Array.from(e.completedQuestionIds),
+        attempts: e.attempts,
+        bestScore: e.bestScore,
+        avgScore: e.attempts ? Math.round(e.scoreSum / e.attempts) : 0,
+        lastAttempt: e.lastAttempt,
+      };
+    }
+
+    console.log(
+      `[QUIZ-STATS] uid=${firebaseUid} class=${classLevel} lang=${language} ` +
+        `subjects=${Object.keys(data).length}`
+    );
+
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   saveQuizResult,
   getQuizHistory,
   clearQuizHistory,
   getProgress,
+  getQuizStats,
   syncUserStats,
 };

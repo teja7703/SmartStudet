@@ -8,6 +8,7 @@ class QuizModel {
   final String title;
   final String subject;
   final String classLevel;
+  final String language;
   final List<QuestionModel> questions;
 
   const QuizModel({
@@ -15,6 +16,7 @@ class QuizModel {
     required this.title,
     required this.subject,
     required this.classLevel,
+    this.language = 'English',
     required this.questions,
   });
 
@@ -33,12 +35,18 @@ class QuizModel {
     return 'Mixed';
   }
 
-  QuizModel copyWith({List<QuestionModel>? questions}) {
+  QuizModel copyWith({
+    String? id,
+    String? title,
+    String? language,
+    List<QuestionModel>? questions,
+  }) {
     return QuizModel(
-      id: id,
-      title: title,
+      id: id ?? this.id,
+      title: title ?? this.title,
       subject: subject,
       classLevel: classLevel,
+      language: language ?? this.language,
       questions: questions ?? this.questions,
     );
   }

@@ -5,9 +5,6 @@ class AcademicConstants {
   static const String langTelugu = 'Telugu';
 
   static const List<String> academicLevels = [
-    '5',
-    '6',
-    '7',
     '8',
     '9',
     '10',

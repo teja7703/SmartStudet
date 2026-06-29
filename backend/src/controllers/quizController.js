@@ -22,6 +22,7 @@ const getQuizzes = async (req, res) => {
         classLevel,
         category,
         difficulty,
+        language,
         page = 1,
         limit = 10,
       } = req.query;
@@ -38,6 +39,18 @@ const getQuizzes = async (req, res) => {
   
       if (difficulty) {
         filter.difficulty = difficulty;
+      }
+
+      // Language filter. English also matches legacy questions that have no
+      // language stored. Telugu matches only Telugu-tagged questions.
+      if (language === 'Telugu') {
+        filter.language = 'Telugu';
+      } else if (language === 'English') {
+        filter.$or = [
+          { language: 'English' },
+          { language: { $exists: false } },
+          { language: '' },
+        ];
       }
   
       const pageNumber = parseInt(page);

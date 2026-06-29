@@ -13,6 +13,7 @@ import 'features/progress/cubit/progress_cubit.dart';
 import 'features/progress/repositories/progress_repository.dart';
 import 'features/quizzes/cubit/quiz_cubit.dart';
 import 'features/quizzes/cubit/quiz_play_cubit.dart';
+import 'features/quizzes/cubit/quiz_subjects_cubit.dart';
 import 'features/quizzes/models/quiz_model.dart';
 import 'features/quizzes/repositories/quiz_repository.dart';
 import 'features/smart_gpt/cubit/smart_gpt_cubit.dart';
@@ -114,6 +115,17 @@ SmartGptCubit createSmartGptCubit() {
 
 QuizPlayCubit createQuizPlayCubit(QuizModel quiz) {
   return QuizPlayCubit(quiz: quiz, repository: getIt<QuizRepository>());
+}
+
+QuizSubjectsCubit createQuizSubjectsCubit({
+  required String classLevel,
+  required String language,
+}) {
+  return QuizSubjectsCubit(
+    repository: getIt<QuizRepository>(),
+    classLevel: classLevel,
+    language: language,
+  );
 }
 
 PreviousPaperCubit createPreviousPaperCubit({

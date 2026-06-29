@@ -1,12 +1,18 @@
+import 'dart:math';
+
 import '../../../core/network/api_client.dart';
 import '../../../core/services/storage_service.dart';
 import '../models/question_model.dart';
 import '../models/quiz_model.dart';
 import '../models/quiz_result_model.dart';
+import '../models/subject_quiz_stats.dart';
 
 class QuizRepository {
   final ApiClient _apiClient;
   final StorageService _storageService;
+
+  /// Number of questions that make up a single quiz attempt.
+  static const int quizSize = 10;
 
   QuizRepository({
     required ApiClient apiClient,
@@ -19,6 +25,7 @@ class QuizRepository {
     String? classLevel,
     String? category,
     String? difficulty,
+    String? language,
     int page = 1,
     int limit = 500,
   }) async {
@@ -30,6 +37,7 @@ class QuizRepository {
         if (category != null && category.isNotEmpty) 'category': category,
         if (difficulty != null && difficulty.isNotEmpty)
           'difficulty': difficulty,
+        if (language != null && language.isNotEmpty) 'language': language,
         'page': page,
         'limit': limit,
       },
@@ -37,6 +45,113 @@ class QuizRepository {
 
     final List data = response.data['data'] ?? [];
     return data.map((e) => QuestionModel.fromJson(e)).toList();
+  }
+
+  /// Builds the subject list (each a full question pool) for one class and the
+  /// chosen [language].
+  ///
+  /// English-subject rule: the "English" subject is always returned in English
+  /// regardless of [language]. For every other subject the chosen language is
+  /// used, falling back to English questions when none exist in that language
+  /// (so the screen is never empty when only English content has been seeded).
+  Future<List<QuizModel>> getSubjects({
+    required String classLevel,
+    required String language,
+  }) async {
+    final questions = await getQuestions(classLevel: classLevel, limit: 1000);
+
+    final bySubject = <String, List<QuestionModel>>{};
+    for (final q in questions) {
+      final subject = q.category.isEmpty ? 'General' : q.category;
+      bySubject.putIfAbsent(subject, () => []).add(q);
+    }
+
+    final quizzes = <QuizModel>[];
+    bySubject.forEach((subject, pool) {
+      final effectiveLang = _effectiveLanguage(subject, language);
+
+      var selected =
+          pool.where((q) => q.language == effectiveLang).toList();
+      if (selected.isEmpty) {
+        selected = pool.where((q) => q.language == 'English').toList();
+      }
+      if (selected.isEmpty) selected = pool;
+
+      quizzes.add(QuizModel(
+        id: '$classLevel-$subject',
+        title: '$subject Quiz',
+        subject: subject,
+        classLevel: classLevel,
+        language: effectiveLang,
+        questions: selected,
+      ));
+    });
+
+    quizzes.sort((a, b) => a.subject.compareTo(b.subject));
+    return quizzes;
+  }
+
+  /// Per-subject quiz stats for the signed-in user (completed question ids,
+  /// best/avg score, last attempt). Empty map when offline.
+  Future<Map<String, SubjectQuizStats>> getQuizStats({
+    required String classLevel,
+    required String language,
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        '/api/progress/quiz-stats',
+        queryParameters: {'classLevel': classLevel, 'language': language},
+      );
+      final data =
+          (response.data['data'] as Map?)?.cast<String, dynamic>() ?? {};
+      return data.map(
+        (key, value) => MapEntry(
+          key,
+          SubjectQuizStats.fromJson(Map<String, dynamic>.from(value)),
+        ),
+      );
+    } catch (_) {
+      return {};
+    }
+  }
+
+  /// Composes a fresh quiz attempt from a subject [pool]: excludes questions the
+  /// user already completed (unless [practiceAgain]), shuffles question order
+  /// and the options of each question.
+  QuizModel buildAttempt(
+    QuizModel pool, {
+    Set<String> completedIds = const {},
+    bool practiceAgain = false,
+    int size = quizSize,
+  }) {
+    final rng = Random();
+    final all = [...pool.questions];
+
+    List<QuestionModel> available;
+    if (practiceAgain) {
+      available = all;
+    } else {
+      available = all.where((q) => !completedIds.contains(q.id)).toList();
+      // Everything done already → recycle the whole pool so a quiz can still
+      // start (the screen will have offered "Practice Again").
+      if (available.isEmpty) available = all;
+    }
+
+    available.shuffle(rng);
+    final picked = available.take(size).map((q) {
+      final options = [...q.options]..shuffle(rng);
+      return q.copyWith(options: options);
+    }).toList();
+
+    return pool.copyWith(
+      id: '${pool.id}-${DateTime.now().millisecondsSinceEpoch}',
+      questions: picked,
+    );
+  }
+
+  String _effectiveLanguage(String subject, String chosen) {
+    if (subject.toLowerCase() == 'english') return 'English';
+    return chosen;
   }
 
   /// Builds the full quiz catalog dynamically: a list of quizzes per class
